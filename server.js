@@ -1,16 +1,46 @@
-const http = require('http') 
+const http = require('http');
+const fs = require('fs');
+const _ = require('lodash');
 
 const server = http.createServer((req, res) => {
-  console.log(req.url, req.method);
+  const num = _.random(0, 20);
+  console.log(num);
 
-  //set header contetnt type
-  res.setHeader('Content-type', 'text/html')
+  res.setHeader('Content-Type', 'text/html');
 
-  res.write('<p>hello ninjas</p>');
-  res.write('<p>hello again, ninjas</p>');
-  res.end();
+  let path;
+  switch (req.url) {
+    case '/':
+      path = './views/index.html';
+      res.statusCode = 200;
+      break;
+    case '/about':
+      path = './views/about.html';
+      res.statusCode = 200;
+      break;
+    case '/about-blah':
+      //console.log('Redirecting /about-blah to /about');
+      res.statusCode = 301;
+      res.setHeader('Location', '/about');
+      res.end();
+      //return; // Stop further processing
+    default:
+      path = './views/404.html';
+      res.statusCode = 404;
+      break;
+  }
+
+  fs.readFile(path, (err, data) => {
+    if (err) {
+      console.log("Error reading file:", err);
+      res.end();
+    } else {
+      res.write(data);
+      res.end();
+    }
+  });
 });
 
-server.listen(3000,'localhost', () => {
-  console.log('listening for request on port 3000')
-})
+server.listen(3000, 'localhost', () => {
+  console.log('Listening for requests on port 3000');
+});
